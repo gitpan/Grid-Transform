@@ -3,7 +3,7 @@ package Grid::Transform;
 use strict;
 use vars qw($VERSION @ISA);
   
-$VERSION = '0.01';
+$VERSION = '0.02';
   
 eval {
   require XSLoader;
@@ -168,6 +168,22 @@ clock-wise.
             |                e f g h  ->  b f j
   a e i b f j c g k d h l    i j k l      c g k
                                           d h l
+
+=item $g->fold_right
+
+Folds the columns to the right.
+
+  a b c d e f g h i j k l    a b c d      b c d a
+            |                e f g h  ->  f g e h
+  b c a d f g e h j k i l    i j k l      j k i l
+
+=item $g->fold_left
+
+Folds the columns to the left.
+
+  a b c d e f g h i j k l    a b c d      d a c b
+            |                e f g h  ->  h e g f
+  d a c b h e g f l i k j    i j k l      l i k j
 
 =back
 

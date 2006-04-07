@@ -309,6 +309,56 @@ flip_vertical (self)
                   AvARRAY(self->grid)[col + brow * self->columns]);
     XSRETURN(1);
 
+void fold_right (self)
+    Grid::Transform self
+  PROTOTYPE: $
+  PREINIT:
+    SV **tmp;
+    IV n, i, row, col, h;
+  PPCODE:
+    FIX_DIRTY_GRID(self);
+    n = self->rows * self->columns;
+    New(0, tmp, n, SV*);
+    h = self->columns >> 1;
+    for (i=0, row=0; row<self->rows; row++) {
+      IV cn = row * self->columns;
+      if (self->columns & 1)
+        tmp[i++] = AvARRAY(self->grid)[h + cn];
+      for (col=h-1; col>=0; col--) {
+        tmp[i++] = AvARRAY(self->grid)[col + cn];
+        tmp[i++] = AvARRAY(self->grid)[self->columns - 1 - col + cn];
+      }
+    }
+    for (i=0; i<n; i++)
+      AvARRAY(self->grid)[i] = tmp[i];
+    Safefree(tmp);
+    XSRETURN(1);
+
+void fold_left (self)
+    Grid::Transform self
+  PROTOTYPE: $
+  PREINIT:
+    SV **tmp;
+    IV n, i, row, col, h;
+  PPCODE:
+    FIX_DIRTY_GRID(self);
+    n = self->rows * self->columns;
+    New(0, tmp, n, SV*);
+    h = self->columns >> 1;
+    for (i=0, row=0; row<self->rows; row++) {
+      IV cn = row * self->columns;
+      for (col=0; col<h; col++) {
+        tmp[i++] = AvARRAY(self->grid)[self->columns - 1 - col + cn];
+        tmp[i++] = AvARRAY(self->grid)[col + cn];
+      }
+      if (self->columns & 1)
+        tmp[i++] = AvARRAY(self->grid)[h + cn];
+    }
+    for (i=0; i<n; i++)
+      AvARRAY(self->grid)[i] = tmp[i];
+    Safefree(tmp);
+    XSRETURN(1);
+
 void
 DESTROY (self)
     Grid::Transform self

@@ -1,4 +1,7 @@
 Revision history for Grid::Transform
 
+0.02  Fri Apr 7 16:25:40 GMT 2006
+    - Added fold_right, fold_left.
+
 0.01  Sun Apr 2 16:01:39 GMT 2006
     - Initial distribution.
