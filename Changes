@@ -1,4 +1,9 @@
-Revision history for Grid::Transform
+Revision history for Grid-Transform
+
+0.03 Tue Jul 31 05:12:16 GMT 2007
+    - Update META.yml to comply with new spec.
+    - Added perl implementations of alternate_row_direction and spiral.
+    - Added a kwalitee test.
 
 0.02  Fri Apr 7 16:25:40 GMT 2006
     - Added fold_right, fold_left.

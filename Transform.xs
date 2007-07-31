@@ -4,10 +4,10 @@
 #include "ppport.h"
 
 typedef struct {
-  AV  *grid;
-  int rows;
-  int columns;
-  int dirty;
+    AV  *grid;
+    int rows;
+    int columns;
+    int dirty;
 } grid_t;
 
 typedef grid_t *Grid__Transform;
@@ -19,39 +19,41 @@ typedef grid_t *Grid__Transform;
    the removed elements are again available if the dimensions are later
    altered. */
 #define FIX_DIRTY_GRID(g)                                                      \
-  if ((g)->dirty) {                                                            \
-    IV len = av_len((g)->grid);                                                \
-    IV add = (g)->rows * (g)->columns - len - 1;                               \
-    av_extend((g)->grid, len + add);                                           \
-    AvFILLp((g)->grid) += add;                                                 \
-    if (add > 0) {                                                             \
-      IV i;                                                                    \
-      /* Find position after last extra element. */                            \
-      /* TODO: binary search? */                                               \
-      for (i=len+1; i<=AvFILLp((g)->grid); i++)                                \
-         if (AvARRAY((g)->grid)[i] == &PL_sv_undef) break;                     \
-      for (; i<=AvFILLp((g)->grid); i++)                                       \
-        AvARRAY((g)->grid)[i] =  newSVpvn("", 0);                              \
-    }                                                                          \
-    (g)->dirty = 0;                                                            \
-  }
+    if ((g)->dirty) {                                                          \
+        IV len = av_len((g)->grid);                                            \
+        IV add = (g)->rows * (g)->columns - len - 1;                           \
+        av_extend((g)->grid, len + add);                                       \
+        AvFILLp((g)->grid) += add;                                             \
+        if (add > 0) {                                                         \
+            IV i;                                                              \
+            /* Find position after last extra element. */                      \
+            /* TODO: binary search? */                                         \
+            for (i=len+1; i<=AvFILLp((g)->grid); i++) {                        \
+                if (AvARRAY((g)->grid)[i] == &PL_sv_undef) break;              \
+            }                                                                  \
+            for (; i<=AvFILLp((g)->grid); i++) {                               \
+                AvARRAY((g)->grid)[i] =  newSVpvn("", 0);                      \
+            }                                                                  \
+        }                                                                      \
+       (g)->dirty = 0;                                                         \
+    }
 
 #define SWAP(type,a,b)                                                         \
-  STMT_START {                                                                 \
-    type tmp = (a);                                                            \
-    (a) = (b);                                                                 \
-    (b) = tmp;                                                                 \
-  } STMT_END
+    STMT_START {                                                               \
+        type tmp = (a);                                                        \
+        (a) = (b);                                                             \
+        (b) = tmp;                                                             \
+    } STMT_END
 
 #define REVERSE_AV(av)                                                         \
-  STMT_START {                                                                 \
-    SV **s = AvARRAY((av));                                                    \
-    SV **e = s + av_len((av));                                                 \
-    while (s < e) {                                                            \
-      SV *tmp = *s;                                                            \
-      *s++ = *e;                                                               \
-      *e-- = tmp;                                                              \
-    }                                                                          \
+    STMT_START {                                                               \
+        SV **s = AvARRAY((av));                                                \
+        SV **e = s + av_len((av));                                             \
+        while (s < e) {                                                        \
+            SV *tmp = *s;                                                      \
+            *s++ = *e;                                                         \
+            *e-- = tmp;                                                        \
+        }                                                                      \
   } STMT_END
 
 MODULE = Grid::Transform  PACKAGE = Grid::Transform
@@ -60,11 +62,11 @@ Grid::Transform
 new (class, av, ...)
     char *class
     AV *av
-  PROTOTYPE: $\@$$;$$
-  PREINIT:
+PROTOTYPE: $\@$$;$$
+PREINIT:
     grid_t *self;
     IV i, len, add = 0;
-  CODE:
+CODE:
     New(0, self, 1, grid_t);
 
     self->rows = 0;
@@ -72,26 +74,30 @@ new (class, av, ...)
     self->dirty = 0;
 
     for(i=2; i<items; i+=2) { 
-      char *key = SvPV(ST(i), PL_na);
-      if (strEQ(key, "rows"))
-        self->rows = SvIV(ST(i+1));
-      else if (strEQ(key, "columns"))
-        self->columns = SvIV(ST(i+1));
-      else
-        croak("unknown key in parameter list: %s", key);
+        char *key = SvPV(ST(i), PL_na);
+        if (strEQ(key, "rows")) {
+            self->rows = SvIV(ST(i+1));
+        }
+        else if (strEQ(key, "columns")) {
+            self->columns = SvIV(ST(i+1));
+        }
+        else {
+            croak("unknown key in parameter list: %s", key);
+        }
     }
 
     len = av_len(av);
 
     if (! self->rows && ! self->columns) {
-      croak("no \"rows\" or \"columns\"");
+        croak("no \"rows\" or \"columns\"");
     }
     /* Determine missing dimension. */
-    else if (! self->rows)
-      self->rows = (len+1) / self->columns + ((len+1) % self->columns ? 1 : 0);
-    else if (! self->columns)
-      self->columns = (len+1) / self->rows + ((len+1) % self->rows ? 1 : 0);
-
+    else if (! self->rows) {
+        self->rows = (len+1) / self->columns + ((len+1) % self->columns ? 1 : 0);
+    }
+    else if (! self->columns) {
+        self->columns = (len+1) / self->rows + ((len+1) % self->rows ? 1 : 0);
+    }
     /* Add or remove extra elements to ensure a rectangular grid. */
     add = self->rows * self->columns - len - 1;
 
@@ -102,91 +108,95 @@ new (class, av, ...)
     AvFILLp(self->grid) = len + add;
 
     /* Copy original array. */
-    for (i=0; i<=len; i++)
-       AvARRAY(self->grid)[i] = newSVsv(AvARRAY(av)[i]);
+    for (i=0; i<=len; i++) {
+        AvARRAY(self->grid)[i] = newSVsv(AvARRAY(av)[i]);
+    }
     /* Add extra empty elements. */
-    for (i=add+len; i>len; i--)
-       AvARRAY(self->grid)[i] = newSVpvn("", 0);
+    for (i=add+len; i>len; i--) {
+        AvARRAY(self->grid)[i] = newSVpvn("", 0);
+    }
     RETVAL = self;
-  OUTPUT:
+OUTPUT:
     RETVAL
 
 Grid::Transform
 copy (self)
     Grid::Transform self
-  PROTOTYPE: $
-  PREINIT:
+PROTOTYPE: $
+PREINIT:
     grid_t *copy;
-  CODE:
+CODE:
     New(0, copy, 1, grid_t);
     copy->grid = av_make(av_len(self->grid)+1, AvARRAY(self->grid));
     copy->rows = self->rows;
     copy->columns = self->columns;
     RETVAL = copy;
-  OUTPUT:
+OUTPUT:
     RETVAL
 
 IV
 rows (self, rows=0)
     Grid::Transform self
     IV rows
-  PROTOTYPE: $;$
-  CODE:
+PROTOTYPE: $;$
+CODE:
     if (items == 2) {
-      self->rows = rows;
-      self->dirty = 1;
+        self->rows = rows;
+        self->dirty = 1;
     }
     RETVAL = self->rows;
-  OUTPUT:
+OUTPUT:
     RETVAL
 
 IV
 columns (self, columns=0)
     Grid::Transform self
     IV columns
-  PROTOTYPE: $;$
-  ALIAS:
+PROTOTYPE: $;$
+ALIAS:
     cols = 1
-  CODE:
+CODE:
     if (items == 2) {
-      self->columns = columns;
-      self->dirty = 1;
+        self->columns = columns;
+        self->dirty = 1;
     }
     RETVAL = self->columns;
-  OUTPUT:
+OUTPUT:
     RETVAL
 
 void
 grid (self, av=0)
     Grid::Transform self
     AV *av
-  PROTOTYPE: $;\@
-  PPCODE:
+PROTOTYPE: $;\@
+PPCODE:
     if (items == 2) {
-      AV *old = self->grid;
-      self->grid = av_make(av_len(av)+1, AvARRAY(av));
-      SvREFCNT_dec(old);
-      self->dirty = 1;
+        AV *old = self->grid;
+        self->grid = av_make(av_len(av)+1, AvARRAY(av));
+        SvREFCNT_dec(old);
+        self->dirty = 1;
     }
     if (GIMME_V != G_VOID) {
-      FIX_DIRTY_GRID(self);
-      if (GIMME_V == G_ARRAY) {
-        IV i, len = av_len(self->grid);
-        EXTEND(SP, len + 1);
-        for (i=0; i<=len; i++)
-          PUSHs(sv_2mortal(SvREFCNT_inc(AvARRAY(self->grid)[i])));
-      }
-      else
-        PUSHs(sv_2mortal(newRV_inc((SV *)self->grid)));
+        FIX_DIRTY_GRID(self);
+        if (GIMME_V == G_ARRAY) {
+            IV i, len = av_len(self->grid);
+            EXTEND(SP, len + 1);
+            for (i=0; i<=len; i++) {
+                PUSHs(sv_2mortal(SvREFCNT_inc(AvARRAY(self->grid)[i])));
+            }
+        }
+        else {
+            PUSHs(sv_2mortal(newRV_inc((SV *)self->grid)));
+        }
     }
 
 void
 rotate_180 (self)
     Grid::Transform self
-  PROTOTYPE: $
-  ALIAS:
+PROTOTYPE: $
+ALIAS:
     rotate180 = 1
-  PPCODE:
+PPCODE:
     FIX_DIRTY_GRID(self);
     REVERSE_AV(self->grid);
     XSRETURN(1);
@@ -194,21 +204,24 @@ rotate_180 (self)
 void
 rotate_90 (self)
     Grid::Transform self
-  PROTOTYPE: $
-  ALIAS:
+PROTOTYPE: $
+ALIAS:
     rotate90 = 1
-  PREINIT:
+PREINIT:
     SV **tmp;
     IV n, i, row, col;
-  PPCODE:
+PPCODE:
     FIX_DIRTY_GRID(self);
     n = self->rows * self->columns;
     New(0, tmp, n, SV*);
-    for (i=0, col=0; col<self->columns; col++)
-      for (row=self->rows-1; row>=0; row--, i++)
-        tmp[i] = AvARRAY(self->grid)[col + row * self->columns];
-    for (i=0; i<n; i++)
-      AvARRAY(self->grid)[i] = tmp[i];
+    for (i=0, col=0; col<self->columns; col++) {
+        for (row=self->rows-1; row>=0; row--, i++) {
+            tmp[i] = AvARRAY(self->grid)[col + row * self->columns];
+        }
+    }
+    for (i=0; i<n; i++) {
+        AvARRAY(self->grid)[i] = tmp[i];
+    }
     Safefree(tmp);
     SWAP(IV, self->rows, self->columns);
     XSRETURN(1);
@@ -216,21 +229,24 @@ rotate_90 (self)
 void
 rotate_270 (self)
     Grid::Transform self
-  PROTOTYPE: $
-  ALIAS:
+PROTOTYPE: $
+ALIAS:
     rotate270 = 1
-  PREINIT:
+PREINIT:
     SV **tmp;
     IV n, i, row, col;
-  PPCODE:
+PPCODE:
     FIX_DIRTY_GRID(self);
     n = self->rows * self->columns;
     New(0, tmp, n, SV*);
-    for (i=0, col=self->columns-1; col>=0; col--)
-      for (row=0; row<self->rows; row++, i++)
-        tmp[i] = AvARRAY(self->grid)[col + row * self->columns];
-    for (i=0; i<n; i++)
-      AvARRAY(self->grid)[i] = tmp[i];
+    for (i=0, col=self->columns-1; col>=0; col--) {
+        for (row=0; row<self->rows; row++, i++) {
+            tmp[i] = AvARRAY(self->grid)[col + row * self->columns];
+        }
+    }
+    for (i=0; i<n; i++) {
+        AvARRAY(self->grid)[i] = tmp[i];
+    }
     Safefree(tmp);
     SWAP(IV, self->rows, self->columns);
     XSRETURN(1);
@@ -238,19 +254,22 @@ rotate_270 (self)
 void
 transpose (self)
     Grid::Transform self
-  PROTOTYPE: $
-  PREINIT:
+PROTOTYPE: $
+PREINIT:
     SV **tmp;
     IV n, i, row, col;
-  PPCODE:
+PPCODE:
     FIX_DIRTY_GRID(self);
     n = self->rows * self->columns;
     New(0, tmp, n, SV*);
-    for (i=0, col=self->columns-1; col>=0; col--)
-      for (row=self->rows-1; row>=0; row--, i++)
-        tmp[i] = AvARRAY(self->grid)[col + row * self->columns];
-    for (i=0; i<n; i++)
-      AvARRAY(self->grid)[i] = tmp[i];
+    for (i=0, col=self->columns-1; col>=0; col--) {
+        for (row=self->rows-1; row>=0; row--, i++) {
+            tmp[i] = AvARRAY(self->grid)[col + row * self->columns];
+        }
+    }
+    for (i=0; i<n; i++) {
+        AvARRAY(self->grid)[i] = tmp[i];
+    }
     Safefree(tmp);
     SWAP(IV, self->rows, self->columns);
     XSRETURN(1);
@@ -258,21 +277,24 @@ transpose (self)
 void
 counter_transpose (self)
     Grid::Transform self
-  PROTOTYPE: $
-  ALIAS:
+PROTOTYPE: $
+ALIAS:
     countertranspose = 1
-  PREINIT:
+PREINIT:
     SV **tmp;
     IV n, i, row, col;
-  PPCODE:
+PPCODE:
     FIX_DIRTY_GRID(self);
     n = self->rows * self->columns;
     New(0, tmp, n, SV*);
-    for (i=0, col=0; col<self->columns; col++)
-      for (row=0; row<self->rows; row++, i++)
-        tmp[i] = AvARRAY(self->grid)[col + row * self->columns];
-    for (i=0; i<n; i++)
-      AvARRAY(self->grid)[i] = tmp[i];
+    for (i=0, col=0; col<self->columns; col++) {
+        for (row=0; row<self->rows; row++, i++) {
+            tmp[i] = AvARRAY(self->grid)[col + row * self->columns];
+        }
+    }
+    for (i=0; i<n; i++) {
+        AvARRAY(self->grid)[i] = tmp[i];
+    }
     Safefree(tmp);
     SWAP(IV, self->rows, self->columns);
     XSRETURN(1);
@@ -280,89 +302,98 @@ counter_transpose (self)
 void
 flip_horizontal (self)
     Grid::Transform self
-  PROTOTYPE: $
-  ALIAS:
+PROTOTYPE: $
+ALIAS:
     mirror_horizontal = 1
-  PREINIT:
+PREINIT:
     IV row, lcol, rcol;
-  PPCODE:
+PPCODE:
     FIX_DIRTY_GRID(self);
-    for (row=0; row<self->rows; row++)
-      for (lcol=0, rcol=self->columns-1; lcol<rcol; lcol++, rcol--)
-        SWAP(SV*, AvARRAY(self->grid)[lcol + row * self->columns],
-                  AvARRAY(self->grid)[rcol + row * self->columns]);
+    for (row=0; row<self->rows; row++) {
+        for (lcol=0, rcol=self->columns-1; lcol<rcol; lcol++, rcol--) {
+            SWAP(SV*, AvARRAY(self->grid)[lcol + row * self->columns],
+                      AvARRAY(self->grid)[rcol + row * self->columns]);
+        }
+    }
     XSRETURN(1);
 
 void
 flip_vertical (self)
     Grid::Transform self
-  PROTOTYPE: $
-  ALIAS:
+PROTOTYPE: $
+ALIAS:
     mirror_vertical = 1
-  PREINIT:
+PREINIT:
     IV col, trow, brow;
-  PPCODE:
+PPCODE:
     FIX_DIRTY_GRID(self);
-    for (col=0; col<self->columns; col++)
-      for (trow=0, brow=self->rows-1; trow<brow; trow++, brow--)
-        SWAP(SV*, AvARRAY(self->grid)[col + trow * self->columns],
-                  AvARRAY(self->grid)[col + brow * self->columns]);
+    for (col=0; col<self->columns; col++) {
+        for (trow=0, brow=self->rows-1; trow<brow; trow++, brow--) {
+            SWAP(SV*, AvARRAY(self->grid)[col + trow * self->columns],
+                      AvARRAY(self->grid)[col + brow * self->columns]);
+        }
+    }
     XSRETURN(1);
 
 void fold_right (self)
     Grid::Transform self
-  PROTOTYPE: $
-  PREINIT:
+PROTOTYPE: $
+PREINIT:
     SV **tmp;
     IV n, i, row, col, h;
-  PPCODE:
+PPCODE:
     FIX_DIRTY_GRID(self);
     n = self->rows * self->columns;
     New(0, tmp, n, SV*);
     h = self->columns >> 1;
     for (i=0, row=0; row<self->rows; row++) {
-      IV cn = row * self->columns;
-      if (self->columns & 1)
-        tmp[i++] = AvARRAY(self->grid)[h + cn];
-      for (col=h-1; col>=0; col--) {
-        tmp[i++] = AvARRAY(self->grid)[col + cn];
-        tmp[i++] = AvARRAY(self->grid)[self->columns - 1 - col + cn];
-      }
+        IV cn = row * self->columns;
+        if (self->columns & 1) {
+            tmp[i++] = AvARRAY(self->grid)[h + cn];
+        }
+        for (col=h-1; col>=0; col--) {
+            tmp[i++] = AvARRAY(self->grid)[col + cn];
+            tmp[i++] = AvARRAY(self->grid)[self->columns - 1 - col + cn];
+        }
     }
-    for (i=0; i<n; i++)
-      AvARRAY(self->grid)[i] = tmp[i];
+    for (i=0; i<n; i++) {
+        AvARRAY(self->grid)[i] = tmp[i];
+    }
     Safefree(tmp);
     XSRETURN(1);
 
 void fold_left (self)
     Grid::Transform self
-  PROTOTYPE: $
-  PREINIT:
+PROTOTYPE: $
+PREINIT:
     SV **tmp;
     IV n, i, row, col, h;
-  PPCODE:
+PPCODE:
     FIX_DIRTY_GRID(self);
     n = self->rows * self->columns;
     New(0, tmp, n, SV*);
     h = self->columns >> 1;
     for (i=0, row=0; row<self->rows; row++) {
-      IV cn = row * self->columns;
-      for (col=0; col<h; col++) {
-        tmp[i++] = AvARRAY(self->grid)[self->columns - 1 - col + cn];
-        tmp[i++] = AvARRAY(self->grid)[col + cn];
-      }
-      if (self->columns & 1)
-        tmp[i++] = AvARRAY(self->grid)[h + cn];
+        IV cn = row * self->columns;
+        for (col=0; col<h; col++) {
+            tmp[i++] = AvARRAY(self->grid)[self->columns - 1 - col + cn];
+            tmp[i++] = AvARRAY(self->grid)[col + cn];
+        }
+        if (self->columns & 1) {
+            tmp[i++] = AvARRAY(self->grid)[h + cn];
+        }
     }
-    for (i=0; i<n; i++)
-      AvARRAY(self->grid)[i] = tmp[i];
+    for (i=0; i<n; i++) {
+        AvARRAY(self->grid)[i] = tmp[i];
+    }
     Safefree(tmp);
     XSRETURN(1);
 
 void
 DESTROY (self)
     Grid::Transform self
-  CODE:
-    if (self->grid)
-      SvREFCNT_dec(self->grid);
+CODE:
+    if (self->grid) {
+        SvREFCNT_dec(self->grid);
+    }
     Safefree(self);

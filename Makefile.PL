@@ -1,12 +1,13 @@
 use strict;
+use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-  NAME          => 'Grid::Transform',
-  VERSION_FROM  => 'lib/Grid/Transform.pm',
-  ABSTRACT_FROM => 'lib/Grid/Transform.pm',
-  AUTHOR        => 'gray <gray@cpan.org>',
-  PREREQ_PM     => { 'Test::More' => 0 },
-  clean         => { FILES => 'Grid-Transform-*' },
-  dist          => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    NAME          => 'Grid::Transform',
+    AUTHOR        => 'gray <gray@cpan.org>',
+    VERSION_FROM  => 'lib/Grid/Transform.pm',
+    ABSTRACT_FROM => 'lib/Grid/Transform.pm',
+    PREREQ_PM     => { 'Test::More' => 0 },
+    dist          => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    clean         => { FILES => 'Grid-Transform-*' },
 );

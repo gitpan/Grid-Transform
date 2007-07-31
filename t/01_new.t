@@ -17,8 +17,8 @@ $g = Grid::Transform->new([@array], rows=>5);
 isa_ok($g, 'Grid::Transform', 'new([@array], rows=>5');
 
 my @methods = qw(
-  new copy rows columns cols grid rotate_180 rotate180 rotate_90 rotate90
-  rotate_270 rotate270 flip_horizontal mirror_horizontal flip_vertical
-  mirror_vertical transpose counter_transpose countertranspose
+    new copy rows columns cols grid rotate_180 rotate180 rotate_90 rotate90
+    rotate_270 rotate270 flip_horizontal mirror_horizontal flip_vertical
+    mirror_vertical transpose counter_transpose countertranspose
 );
 can_ok('Grid::Transform', @methods);
