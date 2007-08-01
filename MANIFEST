@@ -16,6 +16,9 @@ t/08_flip_horizontal.t
 t/09_flip_vertical.t
 t/10_transpose.t
 t/11_counter_transpose.t
+t/12_alternate_row_direction.t
+t/13_spiral.t
+t/99_kwalitee.t
 t/99_pod.t
 t/99_pod_coverage.t
 Transform.xs

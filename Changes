@@ -1,5 +1,8 @@
 Revision history for Grid-Transform
 
+0.04 Wed Aug  1 16:33:32 GMT 2007
+    - Hopeful fix for 'is not of type AVPtr' error under 5.6.
+
 0.03 Tue Jul 31 05:12:16 GMT 2007
     - Update META.yml to comply with new spec.
     - Added perl implementations of alternate_row_direction and spiral.

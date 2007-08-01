@@ -59,14 +59,20 @@ typedef grid_t *Grid__Transform;
 MODULE = Grid::Transform  PACKAGE = Grid::Transform
 
 Grid::Transform
-new (class, av, ...)
+new (class, aref, ...)
     char *class
-    AV *av
+    SV *aref
 PROTOTYPE: $\@$$;$$
 PREINIT:
+    AV *av;
     grid_t *self;
     IV i, len, add = 0;
 CODE:
+    av = (AV *)SvRV(aref);
+    if (! (SvRV(aref) && SvTYPE (SvRV(aref)) == SVt_PVAV)) {
+        croak ("reference to an array expected");
+    }
+
     New(0, self, 1, grid_t);
 
     self->rows = 0;
@@ -165,15 +171,19 @@ OUTPUT:
     RETVAL
 
 void
-grid (self, av=0)
+grid (self, aref=0)
     Grid::Transform self
-    AV *av
+    SV *aref
 PROTOTYPE: $;\@
 PPCODE:
     if (items == 2) {
-        AV *old = self->grid;
+        AV *av = (AV *)SvRV(aref);
+        if (! (SvRV(aref) && SvTYPE (SvRV(aref)) == SVt_PVAV)) {
+            croak ("reference to an array expected");
+        }
+
+        SvREFCNT_dec(self->grid);
         self->grid = av_make(av_len(av)+1, AvARRAY(av));
-        SvREFCNT_dec(old);
         self->dirty = 1;
     }
     if (GIMME_V != G_VOID) {
