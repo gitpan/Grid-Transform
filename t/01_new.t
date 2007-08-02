@@ -20,5 +20,6 @@ my @methods = qw(
     new copy rows columns cols grid rotate_180 rotate180 rotate_90 rotate90
     rotate_270 rotate270 flip_horizontal mirror_horizontal flip_vertical
     mirror_vertical transpose counter_transpose countertranspose
+    fold_right fold_left alternate_row_direction alt_row_dir spiral
 );
 can_ok('Grid::Transform', @methods);

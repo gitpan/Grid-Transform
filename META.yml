@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Grid-Transform
-version:             0.04
+version:             0.05
 abstract:            fast grid transformations
 license:             perl
 generated_by:        ExtUtils::MakeMaker version 6.36

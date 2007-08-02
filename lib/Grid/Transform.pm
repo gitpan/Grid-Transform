@@ -2,7 +2,7 @@ package Grid::Transform;
   
 use strict;
   
-our $VERSION = '0.04';
+our $VERSION = '0.05';
   
 eval {
     require XSLoader;
@@ -12,49 +12,6 @@ eval {
     require DynaLoader;
     DynaLoader::bootstrap( __PACKAGE__, $VERSION );
 };
-
-sub alternate_row_direction {
-    my ($self) = @_;
-
-    for (my $y=1; $y<$self->rows; $y+=2) {
-        my $i = $y * $self->cols;
-        my $j = ($y + 1) * $self->cols - 1;
-        @{ $self->grid }[$i..$j] = reverse @{ $self->grid }[$i..$j];
-    }
-
-    return $self;
-}
-
-sub spiral {
-    my ($self) = @_;
-    my ($top, $bottom, $left, $right) = (0, $self->rows-1, 0, $self->cols-1);
-    my @tmp;
-
-    while (1) {  
-        for ($left .. $right) {
-            push @tmp, @{ $self->grid }[$_ + $top * $self->cols ];
-        }
-        last if ++$top > $bottom;
-
-        for ($top .. $bottom) {
-            push @tmp, @{ $self->grid }[ $right + $_ * $self->cols ];
-        }
-        last if --$right < $left;
-
-        for (reverse $left .. $right) {
-            push @tmp, @{ $self->grid }[ $_ + $bottom * $self->cols ];
-        }
-        last if --$bottom < $top;
-
-        for (reverse $top .. $bottom) {
-            push @tmp, @{ $self->grid }[ $left + $_ * $self->cols ];
-        }
-        last if ++$left > $right;
-    }
-  
-    $self->grid(\@tmp);
-    return $self;
-}
 
 1;
 
@@ -227,6 +184,8 @@ Folds the columns to the left.
 
 =item $g->B<alternate_row_direction>
 
+=item $g->B<alt_row_dir>
+
 Follows a path from left to right on the first row, right to left on the
 second, left to right on the third, etc.
 
@@ -236,7 +195,8 @@ second, left to right on the third, etc.
 
 =item $g->B<spiral>
 
-Follows a spiral path towards the center, starting towards the right.
+Follows a spiral path towards the center, starting from the upper left to 
+right.
 
     a b c d e f g h i j k l    a b c d      a b c d
               |                e f g h  ->  h l k j

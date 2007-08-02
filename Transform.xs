@@ -69,7 +69,7 @@ PREINIT:
     IV i, len, add = 0;
 CODE:
     av = (AV *)SvRV(aref);
-    if (! (SvRV(aref) && SvTYPE (SvRV(aref)) == SVt_PVAV)) {
+    if (! (SvRV(aref) && SvTYPE(SvRV(aref)) == SVt_PVAV)) {
         croak ("reference to an array expected");
     }
 
@@ -178,7 +178,7 @@ PROTOTYPE: $;\@
 PPCODE:
     if (items == 2) {
         AV *av = (AV *)SvRV(aref);
-        if (! (SvRV(aref) && SvTYPE (SvRV(aref)) == SVt_PVAV)) {
+        if (! (SvRV(aref) && SvTYPE(SvRV(aref)) == SVt_PVAV)) {
             croak ("reference to an array expected");
         }
 
@@ -392,6 +392,66 @@ PPCODE:
         if (self->columns & 1) {
             tmp[i++] = AvARRAY(self->grid)[h + cn];
         }
+    }
+    for (i=0; i<n; i++) {
+        AvARRAY(self->grid)[i] = tmp[i];
+    }
+    Safefree(tmp);
+    XSRETURN(1);
+
+void alternate_row_direction (self)
+    Grid::Transform self
+PROTOTYPE: $
+ALIAS:
+    alt_row_dir = 1
+PREINIT:
+    IV row, lcol, rcol;
+PPCODE:
+    FIX_DIRTY_GRID(self);
+    for (row=1; row<self->rows; row+=2) {
+        for (lcol=0, rcol=self->columns-1; lcol<rcol; lcol++, rcol--) {
+            SWAP(SV*, AvARRAY(self->grid)[lcol + row * self->columns],
+                      AvARRAY(self->grid)[rcol + row * self->columns]);
+        }
+    }
+    XSRETURN(1);
+
+void spiral (self)
+    Grid::Transform self
+PROTOTYPE: $
+PREINIT:
+    SV **tmp;
+    IV n, i, idx, top, bottom, left, right;
+PPCODE:
+    FIX_DIRTY_GRID(self);
+    n = self->rows * self->columns;
+    New(0, tmp, n, SV*);
+    idx = 0;
+    top = 0;
+    bottom = self->rows-1;
+    left = 0;
+    right = self->columns-1;
+
+    while (1) {
+        for (i=left; i<=right; i++) {
+            tmp[idx++] = AvARRAY(self->grid)[i + top * self->columns];
+        }
+        if (++top > bottom) break;
+
+        for (i=top; i<=bottom; i++) {
+            tmp[idx++] = AvARRAY(self->grid)[right + i * self->columns];
+        }
+        if (--right < left) break;
+
+        for (i=right; i>=left; i--) {
+            tmp[idx++] = AvARRAY(self->grid)[i + bottom * self->columns];
+        }
+        if (--bottom < top) break;
+
+        for (i=bottom; i>=top; i--) {
+            tmp[idx++] = AvARRAY(self->grid)[left + i * self->columns];
+        }
+        if (++left > right) break;
     }
     for (i=0; i<n; i++) {
         AvARRAY(self->grid)[i] = tmp[i];
