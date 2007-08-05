@@ -1,5 +1,9 @@
 Revision history for Grid-Transform
 
+0.06
+    - Define PERL_NO_GET_CONTEXT for improved performance.
+    - Made author tests optional.
+
 0.05  Thu Aug 2 07:59:15 GMT 2007
     - Implemented alternate_row_direciton and spiral in XS.
     - Added tests for fold_right, fold_left
@@ -8,7 +12,7 @@ Revision history for Grid-Transform
     - Hopeful fix for 'is not of type AVPtr' error under 5.6.
 
 0.03  Tue Jul 31 05:12:16 GMT 2007
-    - Update META.yml to comply with new spec.
+    - Updated META.yml to comply with new spec.
     - Added perl implementations of alternate_row_direction and spiral.
     - Added a kwalitee test.
 

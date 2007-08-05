@@ -2,7 +2,7 @@ package Grid::Transform;
   
 use strict;
   
-our $VERSION = '0.05';
+our $VERSION = '0.06';
   
 eval {
     require XSLoader;
@@ -208,7 +208,9 @@ right.
 
 Some of the methods require temporary extra space for bookkeeping, so it's 
 possible that O(n^3) space will be required- the original array, the internal 
-copy, and the temporary space.
+copy, and the temporary space required by the transformation. Note, the copies
+are shallow, so they will be smaller than the original array if it contains
+complex data structures.
 
 =head1 REQUESTS AND BUGS
 
