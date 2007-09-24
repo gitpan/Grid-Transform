@@ -2,7 +2,7 @@ package Grid::Transform;
   
 use strict;
   
-our $VERSION = '0.06';
+our $VERSION = '0.07';
   
 eval {
     require XSLoader;
