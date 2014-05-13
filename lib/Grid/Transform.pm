@@ -1,17 +1,15 @@
 package Grid::Transform;
-  
+
 use strict;
-  
-our $VERSION = '0.07';
-  
-eval {
-    require XSLoader;
-    XSLoader::load( __PACKAGE__, $VERSION );
-    1;
-} or do {
-    require DynaLoader;
-    DynaLoader::bootstrap( __PACKAGE__, $VERSION );
-};
+use warnings;
+
+use XSLoader;
+
+our $VERSION    = '0.08';
+our $XS_VERSION = $VERSION;
+$VERSION = eval $VERSION;
+
+XSLoader::load(__PACKAGE__, $XS_VERSION);
 
 1;
 
@@ -38,16 +36,16 @@ arbitrary data types.
 
 =over
 
-=item $g = Grid::Transform->B<new>( \@grid, rows=>num, columns=>num )
+=item $g = Grid::Transform->B<new>(\@grid, rows=>num, columns=>num)
 
-Creates a new C<Grid::Transform> object.  The first argument is a reference to 
-a 1-dimensional array representing a 2-dimensional "row major" (row by row) 
-grid. (A column major grid is simply the counter transpose of a row major 
-one.)  The grid may be composed of arbitrary data types.  The original array 
+Creates a new C<Grid::Transform> object.  The first argument is a reference to
+a 1-dimensional array representing a 2-dimensional "row major" (row by row)
+grid. (A column major grid is simply the counter transpose of a row major
+one.)  The grid may be composed of arbitrary data types.  The original array
 is never modified- all transformations operate on a copy.
 
-At least one dimension must be specified.  If the grid and dimensions do not 
-produce a rectangular grid extra empty elements ("") will be added to the 
+At least one dimension must be specified.  If the grid and dimensions do not
+produce a rectangular grid extra empty elements ("") will be added to the
 grid.
 
 =item $g2 = $g->B<copy>
@@ -64,16 +62,16 @@ These methods get or set the grid attributes:
 
 =item $grid = $g->B<grid>
 
-=item @grid = $g->B<grid>( \@grid )
+=item @grid = $g->B<grid>(\@grid)
 
-In list context, returns an array representing the current grid.  In scalar 
-context, returns a reference to the array.  Accepts an array reference 
-representing a new grid.  The new grid will be resized if the dimensions of 
+In list context, returns an array representing the current grid.  In scalar
+context, returns a reference to the array.  Accepts an array reference
+representing a new grid.  The new grid will be resized if the dimensions of
 the previous grid do not match.
 
 =item $g->B<rows>
 
-=item $g->B<rows>( $num )
+=item $g->B<rows>($num)
 
 Returns or sets the current number of rows.
 
@@ -81,14 +79,14 @@ Returns or sets the current number of rows.
 
 =item $g->B<cols>
 
-=item $g->B<columns>( $num )
+=item $g->B<columns>($num)
 
 Returns or sets the current number of columns.
 
 =back
 
-All transform methods return the C<Grid::Transform> object, so 
-transforms can be chained.
+All transform methods return the C<Grid::Transform> object, so transforms can
+be chained.
 
 =over
 
@@ -146,7 +144,7 @@ Flips the grid across the vertical axis.
 
 =item $g->B<transpose>
 
-Flips the grid across the vertical axis and then rotates it 90 degress 
+Flips the grid across the vertical axis and then rotates it 90 degress
 clock-wise.
 
     a b c d e f g h i j k l    a b c d      l h d
@@ -195,7 +193,7 @@ second, left to right on the third, etc.
 
 =item $g->B<spiral>
 
-Follows a spiral path towards the center, starting from the upper left to 
+Follows a spiral path towards the center, starting from the upper left to
 right.
 
     a b c d e f g h i j k l    a b c d      a b c d
@@ -206,24 +204,24 @@ right.
 
 =head1 NOTES
 
-Some of the methods require temporary extra space for bookkeeping, so it's 
-possible that O(n^3) space will be required- the original array, the internal 
+Some of the methods require temporary extra space for bookkeeping, so it's
+possible that O(n^3) space will be required- the original array, the internal
 copy, and the temporary space required by the transformation. Note, the copies
 are shallow, so they will be smaller than the original array if it contains
 complex data structures.
 
 =head1 REQUESTS AND BUGS
 
-Please report any bugs or feature requests to 
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Grid-Transform>. I will be 
-notified, and then you'll automatically be notified of progress on your bug as 
+Please report any bugs or feature requests to
+L<http://rt.cpan.org/Public/Bug/Report.html?Queue=Grid-Transform>. I will be
+notified, and then you'll automatically be notified of progress on your bug as
 I make changes.
 
 =head1 TODO
 
 =over
 
-=item * Allow the empty element to be user-specified (e.g. 
+=item * Allow the empty element to be user-specified (e.g.
 $Grid::Transform::EMPTY_ELEMENT or empty_element constructor arg).
 
 =item * Accept / convert grid to LoLs.
@@ -240,6 +238,10 @@ You can also look for information at:
 
 =over
 
+=item * GitHub Source Repository
+
+L<http://github.com/gray/grid-transform>
+
 =item * AnnoCPAN: Annotated CPAN documentation
 
 L<http://annocpan.org/dist/Grid-Transform>
@@ -250,7 +252,7 @@ L<http://cpanratings.perl.org/d/Grid-Transform>
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Grid-Transform>
+L<http://rt.cpan.org/Public/Dist/Display.html?Name=Grid-Transform>
 
 =item * Search CPAN
 
@@ -260,9 +262,9 @@ L<http://search.cpan.org/dist/Grid-Transform>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006-2007 gray <gray at cpan.org>, all rights reserved.
+Copyright (C) 2006-2014 gray <gray at cpan.org>, all rights reserved.
 
-This library is free software; you can redistribute it and/or modify it under 
+This library is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
 
 =head1 AUTHOR

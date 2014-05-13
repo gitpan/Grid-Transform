@@ -20,9 +20,16 @@ t/12_alternate_row_direction.t
 t/13_spiral.t
 t/14_fold_left.t
 t/15_fold_right.t
-t/99_kwalitee.t
-t/99_pod.t
-t/99_pod_coverage.t
 Transform.xs
 typemap
-META.yml                                 Module meta-data (added by MakeMaker)
+xt/kwalitee.t
+xt/leaktrace.t
+xt/perlcritic.t
+xt/perlcriticrc
+xt/pod.t
+xt/pod_coverage.t
+xt/portability_filenames.t
+xt/valgrind.t
+xt/vars.t
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)

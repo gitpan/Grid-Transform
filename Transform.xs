@@ -1,4 +1,5 @@
 #define PERL_NO_GET_CONTEXT
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -15,25 +16,21 @@ typedef grid_t *Grid__Transform;
 
 /* The dimensions or array may be changed by the user at any time, so this
    must alway be called before making use of the grid's array to ensure it is
-   rectangular.  This is done by resizing the array- in essence, adding or
-   removing extra elements.  The resizing is done in a non-destructive way so
-   the removed elements are again available if the dimensions are later
-   altered. */
+   rectangular. */
 #define FIX_DIRTY_GRID(g)                                                      \
     if ((g)->dirty) {                                                          \
         IV len = av_len((g)->grid);                                            \
         IV add = (g)->rows * (g)->columns - len - 1;                           \
-        av_extend((g)->grid, len + add);                                       \
-        AvFILLp((g)->grid) += add;                                             \
+        av_fill((g)->grid, len + add);                                         \
         if (add > 0) {                                                         \
             IV i;                                                              \
             /* Find position after last extra element. */                      \
             /* TODO: binary search? */                                         \
-            for (i=len+1; i<=AvFILLp((g)->grid); i++) {                        \
-                if (AvARRAY((g)->grid)[i] == &PL_sv_undef) break;              \
+            for (i=0; i<add; i++) {                                            \
+                if (! av_exists((g)->grid, len + 1 + i)) break;                \
             }                                                                  \
-            for (; i<=AvFILLp((g)->grid); i++) {                               \
-                AvARRAY((g)->grid)[i] =  newSVpvn("", 0);                      \
+            for (; i<add; i++) {                                               \
+                AvARRAY((g)->grid)[len + 1 + i] = newSVpvn("", 0);             \
             }                                                                  \
         }                                                                      \
        (g)->dirty = 0;                                                         \
@@ -80,7 +77,7 @@ CODE:
     self->columns = 0;
     self->dirty = 0;
 
-    for(i=2; i<items; i+=2) { 
+    for (i=2; i<items; i+=2) {
         char *key = SvPV(ST(i), PL_na);
         if (strEQ(key, "rows")) {
             self->rows = SvIV(ST(i+1));
@@ -111,8 +108,7 @@ CODE:
     self->grid = newAV();
     /* add may be negative, so ensure it does't decrease the size of the
        original array. */
-    av_extend(self->grid, len + (add > 0 ? add : 0));
-    AvFILLp(self->grid) = len + add;
+    av_fill(self->grid, len + MAX(add, 0));
 
     /* Copy original array. */
     for (i=0; i<=len; i++) {
@@ -137,6 +133,7 @@ CODE:
     copy->grid = av_make(av_len(self->grid)+1, AvARRAY(self->grid));
     copy->rows = self->rows;
     copy->columns = self->columns;
+    copy->dirty = self->dirty;
     RETVAL = copy;
 OUTPUT:
     RETVAL

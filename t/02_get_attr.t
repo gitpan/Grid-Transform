@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests=>4;
+use Test::More tests => 4;
 use Grid::Transform;
 
 my $g = Grid::Transform->new([1..27], rows=>5);

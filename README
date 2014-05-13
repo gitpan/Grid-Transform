@@ -17,12 +17,13 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
     Test::More
+    XSLoader
 
 A C compiler is required to build this module.
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2006-2007 by gray <gray@cpan.org>
+Copyright (C) 2006-2014 by gray <gray@cpan.org>
 
-This library is free software; you can redistribute it and/or modify it under 
+This library is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
